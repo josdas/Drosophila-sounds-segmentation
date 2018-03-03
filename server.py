@@ -56,7 +56,7 @@ def start_server(song)
         dcc.Graph(
             id='HELLO THERE',
             figure={
-                'data': iplot_data(song['samples'], segments = song['segments_sin'], sements_1 = song['segments_pulse'], skip = 20)
+                'data': iplot_data(song['samples'], segments = song['segments_pulse'], segments_1 = song['segments_sin'], skip = 20)
                 ,
                 'layout': gobj.Layout(
                     xaxis={'title': 'GDP Per Capita'},
