@@ -31,7 +31,7 @@ def get_colored(x, segments):
     return colors
 
 
-def iplot(y, x=None, segments=None, segments_1=None, skip=1):
+def iplot_data(y, x=None, segments=None, segments_1=None, skip=1):
     if not x:
         x = list(range(len(y)))[::skip]
     if not segments:
@@ -64,4 +64,8 @@ def iplot(y, x=None, segments=None, segments_1=None, skip=1):
             left = i - 1
 
     data = gobj.Data(traces)
-    return plotly.offline.iplot(data)
+    return data
+
+
+def iplot(y, x=None, segments=None, segments_1=None, skip=1):
+    return plotly.offline.iplot(iplot_data(y, x, segments, segments_1, skip))
