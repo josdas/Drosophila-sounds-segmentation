@@ -77,6 +77,7 @@ def information_about_pulse_song(song, data, rate=44100):
     distances = np.zeros(number_of_pulses - 1)
     energies = np.zeros(number_of_pulses)
     max_amps = np.zeros(number_of_pulses)
+    widths = np.zeros(number_of_pulses)
 
     for i in range(number_of_pulses):
         l1, r1 = song[i]
@@ -84,9 +85,10 @@ def information_about_pulse_song(song, data, rate=44100):
         max_amps[i] = np.max(np.absolute(data[l1:r1]))
         if i<(number_of_pulses-1):
             l2, r2 = song[i+1]
-            distances[i] = (l2 - l1) * rate
+            distances[i] = float(l2 - l1) / rate
         y = smooth(np.absolute(data[l1:r1]), 500)
         popt, pcov = curve_fit(gauss, range(len(y)), y)
+        widths[i] = popt[2] * 2 / rate
         # print popt
         # fitted = gauss(range(len(y)), popt[0], popt[1], popt[2])
         # out = np.column_stack((y,fitted))
@@ -103,7 +105,7 @@ def information_about_pulse_song(song, data, rate=44100):
                 'distances'         :distances,
                 'energies'          :energies,
                 'max_amps'          :max_amps,
-                'width'             :popt[2]*2}
+                'widths'            :widths}
 
 def information_about_sine_song(song, data, rate=44100):
     # song - [(l1,r1)]
