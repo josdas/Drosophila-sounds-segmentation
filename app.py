@@ -48,34 +48,17 @@ def generate_table(dataframe, max_rows=10):
 # TEST
 #---------------------
 
-DF_WALMART = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/1962_2006_walmart_store_openings.csv')
-
 DF_GAPMINDER = pd.read_csv(
     'https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv'
 )
 DF_GAPMINDER = DF_GAPMINDER[DF_GAPMINDER['year'] == 2007]
 DF_GAPMINDER.loc[0:20]
 
-DF_SIMPLE = pd.DataFrame({
-    'x': ['A', 'B', 'C', 'D', 'E', 'F'],
-    'y': [4, 3, 1, 2, 3, 6],
-    'z': ['a', 'b', 'c', 'a', 'b', 'c']
-})
-
-ROWS = [
-    {'a': 'AA', 'b': 1},
-    {'a': 'AB', 'b': 2},
-    {'a': 'BB', 'b': 3},
-    {'a': 'BC', 'b': 4},
-    {'a': 'CC', 'b': 5},
-    {'a': 'CD', 'b': 6}
-]
-
-
-
 #---------------------
 sample_rate, d_samples = wavfile.read(file_name)
 segments = parse_segments(file_segments)
+
+DF_SEGMENTS = pd.DataFrame(segments)
 
 app = dash.Dash()
 
@@ -136,20 +119,20 @@ app.layout = html.Div(children=[
 
     #generate_table(df)
     dt.DataTable(
-        rows=DF_GAPMINDER.to_dict('records'),
+        rows=DF_SEGMENTS.to_dict('records'),
 
         # optional - sets the order of columns
-        columns=sorted(DF_GAPMINDER.columns),
+        columns=sorted(DF_SEGMENTS.columns),
 
         row_selectable=True,
         filterable=True,
         sortable=True,
         selected_row_indices=[],
-        id='datatable-gapminder'
+        id='datatable-segments'
     ),
     html.Div(id='selected-indexes'),
     dcc.Graph(
-        id='graph-gapminder'
+        id='graph-segments'
     )
 ])
 
@@ -158,9 +141,9 @@ app.layout = html.Div(children=[
 
 
 @app.callback(
-    Output('datatable-gapminder', 'selected_row_indices'),
-    [Input('graph-gapminder', 'clickData')],
-    [State('datatable-gapminder', 'selected_row_indices')])
+    Output('datatable-segments', 'selected_row_indices'),
+    [Input('graph-segments', 'clickData')],
+    [State('datatable-segments', 'selected_row_indices')])
 def update_selected_row_indices(clickData, selected_row_indices):
     if clickData:
         for point in clickData['points']:
@@ -172,36 +155,44 @@ def update_selected_row_indices(clickData, selected_row_indices):
 
 
 @app.callback(
-    Output('graph-gapminder', 'figure'),
-    [Input('datatable-gapminder', 'rows'),
-     Input('datatable-gapminder', 'selected_row_indices')])
+    Output('graph-segments', 'figure'),
+    [Input('datatable-segments', 'rows'),
+     Input('datatable-segments', 'selected_row_indices')])
 def update_figure(rows, selected_row_indices):
     dff = pd.DataFrame(rows)
+
+
     fig = plotly.tools.make_subplots(
         rows=3, cols=1,
         subplot_titles=('Life Expectancy', 'GDP Per Capita', 'Population',),
         shared_xaxes=True)
+
     marker = {'color': ['#0074D9']*len(dff)}
+
     for i in (selected_row_indices or []):
         marker['color'][i] = '#FF851B'
+
     fig.append_trace({
         'x': dff['country'],
         'y': dff['lifeExp'],
         'type': 'bar',
         'marker': marker
     }, 1, 1)
+
     fig.append_trace({
         'x': dff['country'],
         'y': dff['gdpPercap'],
         'type': 'bar',
         'marker': marker
     }, 2, 1)
+
     fig.append_trace({
         'x': dff['country'],
         'y': dff['pop'],
         'type': 'bar',
         'marker': marker
     }, 3, 1)
+    
     fig['layout']['showlegend'] = False
     fig['layout']['height'] = 800
     fig['layout']['margin'] = {
