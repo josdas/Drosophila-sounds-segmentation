@@ -102,10 +102,14 @@ def information_about_pulse_song(song, data, rate=44100):
     # return (number_of_pulses, song_duration, distances, energies, max_amps)
     return {    'number_of_pulses'  :number_of_pulses,
                 'song_duration'     :song_duration,
-                'distances'         :distances,
-                'energies'          :energies,
-                'max_amps'          :max_amps,
-                'widths'            :widths}
+                'distances_mean'    :np.mean(distances),
+                'distances_std'     :np.std(distances),
+                'energies_mean'     :np.mean(energies),
+                'energies_std'      :np.std(energies),
+                'max_amps_mean'     :np.mean(max_amps),
+                'max_amps_std'      :np.std(max_amps),
+                'widths_mean'       :np.mean(widths),
+                'widths_std'        :np.std(widths)}
 
 def information_about_sine_song(song, data, rate=44100):
     # song - [(l1,r1)]
