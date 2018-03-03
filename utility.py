@@ -10,6 +10,7 @@ from server import start_server
 def make_prediction(samples):
     model = load_model('model.pickle')
     prediction = predict(model, samples)
+    print('Segments predicted')
     return prediction
 
 
@@ -17,8 +18,13 @@ def process_file(file_name):
     sample_rate, samples = wavfile.read(file_name)
     segments_sin, segments_pulse = make_prediction(samples)
     song_p = find_all_songs(segments_pulse)
-    info_sin = information_about_sine_song(segments_sin, samples, sample_rate)
-    info_pulse = information_about_pulse_song(song_p, samples, sample_rate)
+    print('All songs found')
+    info_sin = [information_about_sine_song(segment_sin, samples, sample_rate)
+                for segment_sin in segments_sin]
+    print('Info about sin songs calculated')
+    info_pulse = [information_about_pulse_song(song, samples, sample_rate)
+                  for song in song_p]
+    print('Info about pulse songs calculated')
     return {
         'samples': samples,
         'info_sin': info_sin,
@@ -58,10 +64,10 @@ def main():
     parser = argparse.ArgumentParser(description='File name')
 
     parser.add_argument('-inp')
+    parser.add_argument("--server_off", action="store_true")
     parser.add_argument("--pickle_load", action="store_true")
     parser.add_argument("--pickle_save", action="store_true")
     parser.add_argument("--base_save", action="store_true")
-    parser.add_argument("--server_off", action="store_true")
     parser.add_argument('-out', default=None)
 
     args = parser.parse_args()
