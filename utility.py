@@ -4,6 +4,7 @@ from model import load_model, predict
 from muha import information_about_pulse_song, information_about_sine_song
 from find_all_songs import find_all_songs
 import pickle
+from server import start_server
 
 
 def make_prediction(samples):
@@ -34,6 +35,7 @@ def create_pickle_file(data, file_name, out_file=None):
         out_file = file_name + '.pickle'
     with open(out_file, 'wb') as fl:
         pickle.dump(data, fl)
+    return out_file
 
 
 def create_base_file(data, file_name, out_file=None):
@@ -44,22 +46,44 @@ def create_base_file(data, file_name, out_file=None):
                        [('P', segment[0], segment[1]) for segment in data['segments_pulse']]
         for segment in all_segments:
             fl.write('{} {} {}\n'.format(*segment))
+    return out_file
 
 
 def load_pickle_data(file_name):
-    
+    with open(file_name, 'rb') as fl:
+        return pickle.load(fl)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('integers', metavar='N', type=int, nargs='+',
-                        help='an integer for the accumulator')
-    parser.add_argument('--sum', dest='accumulate', action='store_const',
-                        const=sum, default=max,
-                        help='sum the integers (default: find the max)')
+    parser = argparse.ArgumentParser(description='File name')
+
+    parser.add_argument('-inp')
+    parser.add_argument("--pickle_load", action="store_true")
+    parser.add_argument("--pickle_save", action="store_true")
+    parser.add_argument("--base_save", action="store_true")
+    parser.add_argument("--server_off", action="store_true")
+    parser.add_argument('-out', default=None)
 
     args = parser.parse_args()
-    print(args.accumulate(args.integers))
+
+    if args.pickle_load:
+        data = load_pickle_data(args.inp)
+    else:
+        data = process_file(args.inp)
+
+    print('Loaded {} chunks'.format(len(data['samples'])))
+
+    if args.pickle_save:
+        out = create_pickle_file(data, args.inp, args.out)
+        print('Saved pickle file in', out)
+
+    if args.base_save:
+        out = create_base_file(data, args.inp, args.out)
+        print('Saved base file in', out)
+
+    if not args.server_off:
+        print('Starting server')
+        start_server(data)
 
 
 if __name__ == '__main__':
