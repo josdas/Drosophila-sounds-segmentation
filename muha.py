@@ -63,13 +63,13 @@ def information_about_pulse_song(song, data, rate=44100):
     # song - [(l1,r1), (l2,r2), ...]
     # filename - path
     # TODO: classify peak by lineshape using correlation score
+
     # rate, data = wavfile.read(filename)
-    rate = 44100
     
     number_of_pulses = len(song)
     l1, r1 = song[0]
     ll, rr = song[-1]
-    song_duration = (rr - l1) * rate
+    song_duration = float(rr - l1) / rate
 
     distances = np.zeros(number_of_pulses - 1)
     energies = np.zeros(number_of_pulses)
@@ -87,7 +87,12 @@ def information_about_pulse_song(song, data, rate=44100):
     # energy_std = np.std(energies)
     # max_amps_mean = np.mean(max_amps)
     # max_amps_std = np.std(max_amps)
-    return (number_of_pulses, song_duration, distances, energies, max_amps)
+    # return (number_of_pulses, song_duration, distances, energies, max_amps)
+    return {    'number_of_pulses'  :number_of_pulses,
+                'song_duration'     :song_duration,
+                'distances'         :distances,
+                'energies'          :energies,
+                'max_amps'          :max_amps}
 
 def information_about_sine_song(song, data, rate=44100):
     # song - [(l1,r1)]
@@ -95,15 +100,16 @@ def information_about_sine_song(song, data, rate=44100):
     # 1. Frequency
     # 2. Duration
     # 3. Amplitude modulation (period)
+
     # rate, data = wavfile.read(filename)
     l, r = song[0]
 
-    song_duration = (r - l) * rate
+    song_duration = float(r - l) / rate
 
     N = r - l
     data_wf = data[l:r] * np.sin( np.pi * np.arange(0,N) / (N-1) )
-    np.savetxt('data.txt',data[l:r])
-    np.savetxt('data_wf.txt',data_wf)
+    # np.savetxt('data.txt',data[l:r])
+    # np.savetxt('data_wf.txt',data_wf)
     sp = np.fft.fft(data_wf,2**15)
     freqs = np.linspace(0,rate,len(sp))
     mag = np.sqrt(np.real(sp)**2+np.imag(sp)**2)
@@ -117,13 +123,18 @@ def information_about_sine_song(song, data, rate=44100):
     period = 1/sine_freq
 
     n_periods = int(np.floor(song_duration/period))
+    # print sine_freq, period, song_duration, n_periods
     am_time = np.linspace(0, period * n_periods, n_periods)
     am_amplitude = np.zeros(n_periods)
     for i in range(n_periods):
         am_amplitude[i] = np.sum(np.absolute(data[l+int(i*period*rate):l+int((i+1)*period*rate)]))
-    print am_time
-    print am_amplitude
-
-    np.savetxt('sp.txt',np.column_stack((freqs,mag)))
+    # print am_time
+    # print am_amplitude
+    # np.savetxt('sp.txt',np.column_stack((freqs,mag)))
+    return {    'song_duration' :song_duration,
+                'sine_freq'     :sine_freq,
+                'n_periods'     :n_periods,
+                'am_time'       :am_time,
+                'am_amplitude'  :am_amplitude}
 
 
