@@ -65,6 +65,9 @@ def information_about_pulse_song(song, data, rate=44100):
     # TODO: classify peak by lineshape using correlation score
 
     # rate, data = wavfile.read(filename)
+    def gauss(x, a, b, c):
+        return a*np.exp(-(x-b)**2/(2*c**2))
+
     
     number_of_pulses = len(song)
     l1, r1 = song[0]
@@ -74,13 +77,20 @@ def information_about_pulse_song(song, data, rate=44100):
     distances = np.zeros(number_of_pulses - 1)
     energies = np.zeros(number_of_pulses)
     max_amps = np.zeros(number_of_pulses)
+
     for i in range(number_of_pulses):
         l1, r1 = song[i]
-        l2, r2 = song[i+1]
         energies[i] = np.sum(data[l1:r1])
         max_amps[i] = np.max(np.absolute(data[l1:r1]))
-        if i<number_of_pulses:
+        if i<(number_of_pulses-1):
+            l2, r2 = song[i+1]
             distances[i] = (l2 - l1) * rate
+        y = smooth(np.absolute(data[l1:r1]), 500)
+        popt, pcov = curve_fit(gauss, range(len(y)), y)
+        # print popt
+        # fitted = gauss(range(len(y)), popt[0], popt[1], popt[2])
+        # out = np.column_stack((y,fitted))
+        # np.savetxt('fit.txt',out)
     # distance_mean = np.mean(distances)
     # distance_std = np.std(distances)
     # energy_mean = np.mean(energies)
@@ -92,7 +102,8 @@ def information_about_pulse_song(song, data, rate=44100):
                 'song_duration'     :song_duration,
                 'distances'         :distances,
                 'energies'          :energies,
-                'max_amps'          :max_amps}
+                'max_amps'          :max_amps,
+                'width'             :popt[2]*2}
 
 def information_about_sine_song(song, data, rate=44100):
     # song - [(l1,r1)]
