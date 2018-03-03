@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.io.wavfile as wavfile
 from scipy import signal
+from scipy.optimize import curve_fit
 
 def smooth(x, window_len=11, window='hanning'):
     """smooth the data using a window with requested size.
@@ -59,7 +60,22 @@ def smooth(x, window_len=11, window='hanning'):
     y=np.convolve(w/w.sum(),s,mode='valid')
     return y
 
-def information_about_pulse_song(song, data, rate=44100):
+def detect_pulses_in_song(song, smooth_window = 500):
+    # song - np.array with wav data of song
+    N = len(song)
+    # np.savetxt('song.txt', song)
+    # make amplitude positive
+    song = np.absolute(song)
+    # smooth with given window
+    sm_song = smooth(song, min([smooth_window,N-1]), window='flat')
+    # find peaks
+    widths = np.linspace(441*0.8,441*1.2,10)
+    peakind = signal.find_peaks_cwt(sm_song, widths)
+    # np.savetxt('sm_sont.txt', np.roll(sm_song,-smooth_window/2))
+    return [(max([i-400,0]),min([i+400,N])) for i in peakind]
+
+
+def information_about_pulse_song(song, data, rate=44100, smooth_window=500):
     # song - [(l1,r1), (l2,r2), ...]
     # filename - path
     # TODO: classify peak by lineshape using correlation score
@@ -86,8 +102,12 @@ def information_about_pulse_song(song, data, rate=44100):
         if i<(number_of_pulses-1):
             l2, r2 = song[i+1]
             distances[i] = float(l2 - l1) / rate
-        y = smooth(np.absolute(data[l1:r1]), 500)
-        popt, pcov = curve_fit(gauss, range(len(y)), y)
+        # print l1,r1,smooth_window,(r1-l1-1),min([smooth_window,(r1-l1-1)]),len(np.absolute(data[l1:r1]))
+        y = smooth(np.absolute(data[l1:r1]), min([smooth_window,(r1-l1-1)]))
+        try:
+            popt, pcov = curve_fit(gauss, range(len(y)), y)
+        except RuntimeError:
+            popt = [0, 0, 441]
         widths[i] = popt[2] * 2 / rate
         # print popt
         # fitted = gauss(range(len(y)), popt[0], popt[1], popt[2])
@@ -124,7 +144,13 @@ def information_about_sine_song(song, data, rate=44100):
     song_duration = float(r - l) / rate
 
     N = r - l
-    data_wf = data[l:r] * np.sin( np.pi * np.arange(0,N) / (N-1) )
+    
+    # print len(data[l:r])
+    # a = data
+    # b = np.linspace(0,N-1,N) #np.sin( np.pi * np.linspace(0,N-1,N) / (N-1) )
+    # print data.shape, a.shape, b.shape
+
+    data_wf = data * np.sin( np.pi * np.arange(0,N) / (N-1) )
     # np.savetxt('data.txt',data[l:r])
     # np.savetxt('data_wf.txt',data_wf)
     sp = np.fft.fft(data_wf,2**15)
