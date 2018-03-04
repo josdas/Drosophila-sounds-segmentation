@@ -115,7 +115,7 @@ def start_server(song):
             editable=False
         ),
         dcc.Markdown('''
-        ##### Pulse wawes detalised
+        ##### Pulse wawes:
         ***
         '''.replace('  ', ''), className='container',
                      containerProps={'style': {
@@ -132,7 +132,7 @@ def start_server(song):
             editable=False
         ),
         dcc.Markdown('''
-        ##### Sine wawes detalised
+        ##### Sine wawes:
         ***
         '''.replace('  ', ''), className='container',
                      containerProps={'style': {
