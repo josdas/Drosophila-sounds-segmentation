@@ -24,6 +24,12 @@ def start_server(song):
 
     DF_SEGMENTS = pd.DataFrame([(segment[0], segment[1], 'P') for segment in song['segments_pulse']] + [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
+    Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['sample_rate'])
+    im.write_png('spectre.png')
+    image_filename = 'spectre.png'
+
+    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+
     app.css.append_css({
         'external_url': (
             'https://cdn.rawgit.com/chriddyp/0247653a7c52feb4c48437e1c1837f75'
@@ -93,10 +99,7 @@ def start_server(song):
             id='datatable-segments',
             editable=False
         ),
-        html.Div(id='selected-indexes'),
-        dcc.Graph(
-            id='graph-segments'
-        )
+        html.Img(src='data:image/png;base64,{}'.format(encoded_image))
     ])
 
 
