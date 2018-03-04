@@ -17,12 +17,17 @@ def start_server(song):
         [(segment[0], segment[1], 'P') for segment in song['segments_pulse']] +
         [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
-    Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
-    image_filename = 'spectre.png'
-    im.write_png(image_filename)
+    DF_SEGMENTS.columns = ['start', 'end', 'type']
 
-    with open(image_filename, 'rb') as fl:
-        encoded_image = base64.b64encode(fl.read())
+    DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'])
+    DF_SEGMENTS_PULSE = pd.DataFrame(song['info_pulse'])
+
+    #Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
+    #image_filename = 'spectre.png'
+    #im.write_png(image_filename)
+
+    #with open(image_filename, 'rb') as fl:
+    #    encoded_image = base64.b64encode(fl.read())
 
     app.css.append_css({
         'external_url': (
@@ -35,18 +40,6 @@ def start_server(song):
         dcc.Markdown('''
         ## Analysis of Drosophila sound production
         ##### Good vibrations — BioHack 2018, Saint-Petersburg
-
-        Five years since the end of the Great Recession,
-        the economy has finally regained the nine million jobs it lost.
-        But not all industries recovered equally.
-        Each line below shows how the number of jobs has changed for
-        a particular industry over the past 10 years.
-        Scroll down to see how the recession reshaped the nation’s job market,
-        industry by industry.
-        > This interactive report is a rendition of a
-        > [New York Times original](https://www.nytimes.com/interactive/2014/06/05/upshot/how-the-recession-reshaped-the-economy-in-255-charts.html).
-        > This app demonstrates how to build high-quality, interactive
-        > reports using the Dash framework in Python.
         ***
         '''.replace('  ', ''), className='container',
                      containerProps={'style': {
@@ -71,7 +64,7 @@ def start_server(song):
         ),
 
         dcc.Markdown('''
-        ##### Table example
+        ##### Segmentation results
         ***
         '''.replace('  ', ''), className='container',
                      containerProps={'style': {
@@ -84,7 +77,7 @@ def start_server(song):
             rows=DF_SEGMENTS.to_dict('records'),
 
             # optional - sets the order of columns
-            # columns=sorted(DF_SEGMENTS.columns),
+            #columns=sorted(DF_SEGMENTS.columns),
 
             row_selectable=True,
             filterable=True,
@@ -93,7 +86,49 @@ def start_server(song):
             id='datatable-segments',
             editable=False
         ),
-        html.Img(src='data:image/png;base64,{}'.format(encoded_image))
+                dcc.Markdown('''
+        ##### Pulse wawes detalised
+        ***
+        '''.replace('  ', ''), className='container',
+                     containerProps={'style': {
+                         'left': '10px',
+                         'display': 'inline',
+                     }}),
+            dt.DataTable(
+            rows=DF_SEGMENTS_PULSE.to_dict('records_pulse'),
+
+            # optional - sets the order of columns
+            #columns=sorted(DF_SEGMENTS.columns),
+
+            row_selectable=True,
+            filterable=True,
+            sortable=True,
+            selected_row_indices=[],
+            id='datatable-segments_pulse',
+            editable=False
+        ),
+        dcc.Markdown('''
+        ##### Sine wawes detalised
+        ***
+        '''.replace('  ', ''), className='container',
+                     containerProps={'style': {
+                         'left': '10px',
+                         'display': 'inline',
+                     }}),
+            dt.DataTable(
+            rows=DF_SEGMENTS_PULSE.to_dict('records_sine'),
+
+            # optional - sets the order of columns
+            #columns=sorted(DF_SEGMENTS.columns),
+
+            row_selectable=True,
+            filterable=True,
+            sortable=True,
+            selected_row_indices=[],
+            id='datatable-segments_sine',
+            editable=False
+        )
+
     ])
 
     app.run_server(debug=False)
