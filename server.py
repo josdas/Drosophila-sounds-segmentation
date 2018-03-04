@@ -1,34 +1,28 @@
 # -*- coding: utf-8 -*-
+import base64
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
 import matplotlib.pyplot as plt
-from scipy import signal
-from scipy.io import wavfile
-import numpy as np
-from pylab import rcParams
-import wave
-from iplot import iplot_data, iplot
+from iplot import iplot_data
 import dash_table_experiments as dt
-
-import plotly.plotly as py
 import plotly.graph_objs as gobj
-import plotly
-
 import pandas as pd
 
 
 def start_server(song):
     app = dash.Dash()
 
-    DF_SEGMENTS = pd.DataFrame([(segment[0], segment[1], 'P') for segment in song['segments_pulse']] + [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
+    DF_SEGMENTS = pd.DataFrame(
+        [(segment[0], segment[1], 'P') for segment in song['segments_pulse']] +
+        [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
     Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
-    im.write_png('spectre.png')
     image_filename = 'spectre.png'
+    im.write_png(image_filename)
 
-    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+    with open(image_filename, 'rb') as fl:
+        encoded_image = base64.b64encode(fl.read())
 
     app.css.append_css({
         'external_url': (
@@ -55,15 +49,16 @@ def start_server(song):
         > reports using the Dash framework in Python.
         ***
         '''.replace('  ', ''), className='container',
-        containerProps={'style': {
-                        'left': '10px',
-                        'display': 'inline',
-                    }}),
+                     containerProps={'style': {
+                         'left': '10px',
+                         'display': 'inline',
+                     }}),
 
         dcc.Graph(
             id='soundwawe',
             figure={
-                'data': iplot_data(song['samples'], segments = song['segments_pulse'], segments_1 = song['segments_sin'], skip = 20)
+                'data': iplot_data(song['samples'], segments=song['segments_pulse'], segments_1=song['segments_sin'],
+                                   skip=20)
                 ,
                 'layout': gobj.Layout(
                     xaxis={'title': 'Time'},
@@ -79,18 +74,17 @@ def start_server(song):
         ##### Table example
         ***
         '''.replace('  ', ''), className='container',
-        containerProps={'style': {
-                    'left': '10px',
-                    'display': 'inline',
-                }}),
+                     containerProps={'style': {
+                         'left': '10px',
+                         'display': 'inline',
+                     }}),
 
-
-        #generate_table(df)
+        # generate_table(df)
         dt.DataTable(
             rows=DF_SEGMENTS.to_dict('records'),
 
             # optional - sets the order of columns
-            #columns=sorted(DF_SEGMENTS.columns),
+            # columns=sorted(DF_SEGMENTS.columns),
 
             row_selectable=True,
             filterable=True,
@@ -101,6 +95,5 @@ def start_server(song):
         ),
         html.Img(src='data:image/png;base64,{}'.format(encoded_image))
     ])
-
 
     app.run_server(debug=False)

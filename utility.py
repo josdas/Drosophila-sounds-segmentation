@@ -10,15 +10,17 @@ from server import start_server
 def make_prediction(samples):
     model = load_model('model.pickle')
     prediction = predict(model, samples)
-    print('Segments predicted')
     return prediction
 
 
 def process_file(file_name, length=None):
     sample_rate, samples = wavfile.read(file_name)
+    print('Wav loaded')
     if length:
         samples = samples[:length]
+        print('Cut')
     segments_sin, segments_pulse = make_prediction(samples)
+    print('Segments predicted')
     song_p = find_all_songs(segments_pulse)
     print('All songs found')
     info_sin = [information_about_sine_song(segment_sin, samples, sample_rate)
@@ -70,15 +72,14 @@ def main():
     parser.add_argument("--pickle_load", action="store_true")
     parser.add_argument("--pickle_save", action="store_true")
     parser.add_argument("--base_save", action="store_true")
-    parser.add_argument("-len", default=None)
+    parser.add_argument("-len", default=None, type=int)
     parser.add_argument('-out', default=None)
 
     args = parser.parse_args()
-
     if args.pickle_load:
-        data = load_pickle_data(args.inp, args.len)
+        data = load_pickle_data(args.inp)
     else:
-        data = process_file(args.inp)
+        data = process_file(args.inp, args.len)
 
     print('Loaded {} chunks'.format(len(data['samples'])))
 

@@ -8,6 +8,8 @@
 def find_all_songs(pulses, rate=44100, min_distance=80):
     # pulses - list(tuple)
     num_pulses = len(pulses)
+    if num_pulses == 0:
+        return []
     inter_puls = pulses[0]
     i = 0
     inter_res_songs = []
