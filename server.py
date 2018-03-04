@@ -26,7 +26,7 @@ def start_server(song):
 
     if len(song['info_sin']) > 0:
         DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'], columns=[
-            'start', 'end', 'n_periods', 'song_duration', 'sine_freq',
+            'start', 'end', 'n_periods', 'sine_freq',
             'am_time_mean', 'am_amplitude_mean'])
     else:
         DF_SEGMENTS_SIN = pd.DataFrame([1, 2])
@@ -49,7 +49,7 @@ def start_server(song):
     image_filename = 'fft.png'
     fig, ax = plt.subplots(figsize=(8, 6))
     fourier = np.fft.fftshift(np.fft.fft(song['samples'], n=len(song['samples'])))
-    fourier = fourier[int(len(fourier)*0.4):int(len(fourier)*0.6)]
+    fourier = fourier[int(len(fourier)*0.45):int(len(fourier)*0.55)]
     ax.plot([x.real for x in fourier])
     fig.savefig(image_filename, dpi=100, bbox_inches='tight')
     with open(image_filename, 'rb') as fl:

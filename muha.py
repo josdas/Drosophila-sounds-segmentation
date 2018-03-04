@@ -167,8 +167,7 @@ def information_about_sine_song(song, data, rate=44100):
     # print am_time
     # print am_amplitude
     # np.savetxt('sp.txt',np.column_stack((freqs,mag)))
-    return {'song_duration': song_duration,
-            'sine_freq': sine_freq,
+    return {'sine_freq': sine_freq,
             'n_periods': n_periods,
             'am_time_mean': np.mean(am_time),
             'am_amplitude_mean': np.mean(am_amplitude),

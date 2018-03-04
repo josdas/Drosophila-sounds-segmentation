@@ -53,12 +53,15 @@ def iplot_data(y, x=None, segments=None, segments_1=None, skip=1):
     for i in range(len(x) + 1):
         if i > 0 and (colors[i] != colors[i - 1] or colors_1[i] != colors_1[i - 1]):
             color = BASE_LINE
+            text = 'noise'
             if colors[i - 1] or colors_1[i - 1]:
                 color = SEGMENT_LINE_1 if colors_1[i - 1] else SEGMENT_LINE
+                text = 'sin' if colors_1[i - 1] else 'pulse'
             trace = gobj.Scatter(
                 y=y[left:i],
                 x=x[left:i],
-                line=color
+                line=color,
+                text=text
             )
             traces.append(trace)
             left = i - 1
