@@ -21,8 +21,6 @@ def start_server(song):
     else:
         DF_SEGMENTS = pd.DataFrame([1, 2])
 
-    print(len(song['info_sin']))
-    print(len(song['info_pulse']))
 
     if len(song['info_sin']) > 0:
         DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'], columns=[
@@ -115,7 +113,7 @@ def start_server(song):
             editable=False
         ),
         dcc.Markdown('''
-        ##### Pulse wawes detalised
+        ##### Pulse wawes:
         ***
         '''.replace('  ', ''), className='container',
                      containerProps={'style': {
@@ -132,7 +130,7 @@ def start_server(song):
             editable=False
         ),
         dcc.Markdown('''
-        ##### Sine wawes detalised
+        ##### Sine wawes:
         ***
         '''.replace('  ', ''), className='container',
                      containerProps={'style': {
