@@ -8,35 +8,52 @@ from iplot import iplot_data
 import dash_table_experiments as dt
 import plotly.graph_objs as gobj
 import pandas as pd
+import numpy as np
 
 
 def start_server(song):
     app = dash.Dash()
 
-    DF_SEGMENTS = pd.DataFrame(columns=['start', 'end', 'type'],
-                               data=[(segment[0], segment[1], 'P') for segment in song['segments_pulse']] +
-                                    [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
+    if len(song['segments_pulse']) + len(song['segments_sin']) > 0:
+        DF_SEGMENTS = pd.DataFrame(columns=['start', 'end', 'type'],
+                                   data=[(segment[0], segment[1], 'P') for segment in song['segments_pulse']] +
+                                        [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
+    else:
+        DF_SEGMENTS = pd.DataFrame([1, 2])
 
     print(len(song['info_sin']))
     print(len(song['info_pulse']))
 
-    DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'])[[
-        'start', 'end', 'n_periods', 'song_duration', 'sine_freq',
-        'am_time_mean', 'am_amplitude_mean'
-    ]]
+    if len(song['info_sin']) > 0:
+        DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'], columns=[
+            'start', 'end', 'n_periods', 'song_duration', 'sine_freq',
+            'am_time_mean', 'am_amplitude_mean'])
+    else:
+        DF_SEGMENTS_SIN = pd.DataFrame([1, 2])
+    if len(song['info_pulse']) > 0:
+        DF_SEGMENTS_PULSE = pd.DataFrame(song['info_pulse'], columns=[
+            'start', 'end', 'number_of_pulses', 'song_duration',
+            'max_amps_mean', 'max_amps_std',
+            'widths_mean', 'widths_std',
+            'energies_mean', 'energies_std'])
+    else:
+        DF_SEGMENTS_PULSE = pd.DataFrame([1, 2])
 
-    DF_SEGMENTS_PULSE = pd.DataFrame(song['info_pulse'])[[
-        'start', 'end', 'number_of_pulses', 'song_duration',
-        'max_amps_mean', 'max_amps_std',
-        'widths_mean', 'widths_std',
-        'energies_mean', 'energies_std']]
+    image_filename = 'specgram.png'
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.specgram(song['samples'], NFFT=512, Fs=song['rate'])
+    fig.savefig(image_filename, dpi=100, bbox_inches='tight')
+    with open(image_filename, 'rb') as fl:
+        encoded_specgram_image = base64.b64encode(fl.read())
 
-    # Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
-    # image_filename = 'spectre.png'
-    # im.write_png(image_filename)
-
-    # with open(image_filename, 'rb') as fl:
-    #    encoded_image = base64.b64encode(fl.read())
+    image_filename = 'fft.png'
+    fig, ax = plt.subplots(figsize=(8, 6))
+    fourier = np.fft.fftshift(np.fft.fft(song['samples'], n=len(song['samples'])))
+    fourier = fourier[int(len(fourier)*0.4):int(len(fourier)*0.6)]
+    ax.plot([x.real for x in fourier])
+    fig.savefig(image_filename, dpi=100, bbox_inches='tight')
+    with open(image_filename, 'rb') as fl:
+        encoded_fft_image = base64.b64encode(fl.read())
 
     app.css.append_css({
         'external_url': (
@@ -45,7 +62,6 @@ def start_server(song):
         )
     })
     app.layout = html.Div(children=[
-
         dcc.Markdown('''
         ## Analysis of Drosophila sound production
         ##### Good vibrations — BioHack 2018, Saint-Petersburg
@@ -59,8 +75,8 @@ def start_server(song):
         dcc.Graph(
             id='soundwawe',
             figure={
-                'data': iplot_data(song['samples'], segments=song['segments_pulse'], segments_1=song['segments_sin'],
-                                   skip=20)
+                'data': iplot_data(song['samples'], segments=song['segments_pulse'],
+                                   segments_1=song['segments_sin'], skip=20)
                 ,
                 'layout': gobj.Layout(
                     xaxis={'title': 'Time'},
@@ -72,6 +88,13 @@ def start_server(song):
             }
         ),
 
+        html.Img(
+            src="data:image/png;base64,{}".format(encoded_specgram_image.decode()),
+        ),
+
+        html.Img(
+            src="data:image/png;base64,{}".format(encoded_fft_image.decode()),
+        ),
         dcc.Markdown('''
         ##### Segmentation results
         ***
@@ -124,7 +147,7 @@ def start_server(song):
             selected_row_indices=[],
             id='datatable-segments_sine',
             editable=False
-        )
+        ),
 
     ])
 
