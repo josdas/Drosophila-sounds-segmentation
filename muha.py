@@ -111,8 +111,8 @@ def information_about_pulse_song(song, data, rate=44100, smooth_window=500):
     # return (number_of_pulses, song_duration, distances, energies, max_amps)
     return {'number_of_pulses': number_of_pulses,
             'song_duration': song_duration,
-            #'distances_mean': np.mean(distances),
-            #'distances_std': np.std(distances),
+            # 'distances_mean': np.mean(distances),
+            # 'distances_std': np.std(distances),
             'energies_mean': np.mean(energies),
             'energies_std': np.std(energies),
             'max_amps_mean': np.mean(max_amps),
@@ -163,7 +163,7 @@ def information_about_sine_song(song, data, rate=44100):
     am_time = np.linspace(0, period * n_periods, n_periods)
     am_amplitude = np.zeros(n_periods)
     for i in range(n_periods):
-        am_amplitude[i] = np.sum(np.abs(data[l + int(i * period * rate):l + int((i + 1) * period * rate) + 1]))
+        am_amplitude[i] = np.sum(np.abs(data[int(i * period * rate):int((i + 1) * period * rate) + 1]))
     # print am_time
     # print am_amplitude
     # np.savetxt('sp.txt',np.column_stack((freqs,mag)))

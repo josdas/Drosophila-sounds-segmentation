@@ -13,23 +13,29 @@ import pandas as pd
 def start_server(song):
     app = dash.Dash()
 
-    DF_SEGMENTS = pd.DataFrame(
-        [(segment[0], segment[1], 'P') for segment in song['segments_pulse']] +
-        [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
+    DF_SEGMENTS = pd.DataFrame(columns=['start', 'end', 'type'],
+                               data=[(segment[0], segment[1], 'P') for segment in song['segments_pulse']] +
+                                    [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
-    DF_SEGMENTS.columns = ['start', 'end', 'type']
     print(len(song['info_sin']))
     print(len(song['info_pulse']))
 
+    DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'])[[
+        'start', 'end', 'n_periods', 'song_duration', 'sine_freq',
+        'am_time_mean', 'am_amplitude_mean'
+    ]]
 
-    DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'])
-    DF_SEGMENTS_PULSE = pd.DataFrame(song['info_pulse'])
+    DF_SEGMENTS_PULSE = pd.DataFrame(song['info_pulse'])[[
+        'start', 'end', 'number_of_pulses', 'song_duration',
+        'max_amps_mean', 'max_amps_std',
+        'widths_mean', 'widths_std',
+        'energies_mean', 'energies_std']]
 
-    #Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
-    #image_filename = 'spectre.png'
-    #im.write_png(image_filename)
+    # Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
+    # image_filename = 'spectre.png'
+    # im.write_png(image_filename)
 
-    #with open(image_filename, 'rb') as fl:
+    # with open(image_filename, 'rb') as fl:
     #    encoded_image = base64.b64encode(fl.read())
 
     app.css.append_css({
@@ -78,10 +84,6 @@ def start_server(song):
         # generate_table(df)
         dt.DataTable(
             rows=DF_SEGMENTS.to_dict('records'),
-
-            # optional - sets the order of columns
-            #columns=sorted(DF_SEGMENTS.columns),
-
             row_selectable=True,
             filterable=True,
             sortable=True,
@@ -89,7 +91,7 @@ def start_server(song):
             id='datatable-segments',
             editable=False
         ),
-                dcc.Markdown('''
+        dcc.Markdown('''
         ##### Pulse wawes detalised
         ***
         '''.replace('  ', ''), className='container',
@@ -97,12 +99,8 @@ def start_server(song):
                          'left': '10px',
                          'display': 'inline',
                      }}),
-            dt.DataTable(
+        dt.DataTable(
             rows=DF_SEGMENTS_PULSE.to_dict('records_pulse'),
-
-            # optional - sets the order of columns
-            #columns=sorted(DF_SEGMENTS.columns),
-
             row_selectable=True,
             filterable=True,
             sortable=True,
@@ -118,12 +116,8 @@ def start_server(song):
                          'left': '10px',
                          'display': 'inline',
                      }}),
-            dt.DataTable(
+        dt.DataTable(
             rows=DF_SEGMENTS_SIN.to_dict('records_sine'),
-
-            # optional - sets the order of columns
-            #columns=sorted(DF_SEGMENTS.columns),
-
             row_selectable=True,
             filterable=True,
             sortable=True,
