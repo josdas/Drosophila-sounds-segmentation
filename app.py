@@ -9,7 +9,7 @@ from scipy.io import wavfile
 import numpy as np
 from pylab import rcParams
 import wave
-from iplot import iplot_data
+from iplot import iplot_data, iplot
 import dash_table_experiments as dt
 
 import plotly.plotly as py
@@ -59,6 +59,8 @@ sample_rate, d_samples = wavfile.read(file_name)
 segments = parse_segments(file_segments)
 
 DF_SEGMENTS = pd.DataFrame(segments)
+DF_SEGMENTS = DF_SEGMENTS[0:2]
+DF_SEGMENTS['link'] = '<a href="google.com">Download</a>'
 
 app = dash.Dash()
 
@@ -122,13 +124,14 @@ app.layout = html.Div(children=[
         rows=DF_SEGMENTS.to_dict('records'),
 
         # optional - sets the order of columns
-        columns=sorted(DF_SEGMENTS.columns),
+        #columns=sorted(DF_SEGMENTS.columns),
 
         row_selectable=True,
         filterable=True,
         sortable=True,
         selected_row_indices=[],
-        id='datatable-segments'
+        id='datatable-segments',
+        editable=False
     ),
     html.Div(id='selected-indexes'),
     dcc.Graph(
@@ -161,6 +164,7 @@ def update_selected_row_indices(clickData, selected_row_indices):
 def update_figure(rows, selected_row_indices):
     dff = pd.DataFrame(rows)
 
+    #fig = iplot(d_samples, skip = 20))
 
     fig = plotly.tools.make_subplots(
         rows=3, cols=1,
@@ -192,7 +196,7 @@ def update_figure(rows, selected_row_indices):
         'type': 'bar',
         'marker': marker
     }, 3, 1)
-    
+
     fig['layout']['showlegend'] = False
     fig['layout']['height'] = 800
     fig['layout']['margin'] = {
