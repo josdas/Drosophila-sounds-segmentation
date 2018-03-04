@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 from features import gen_all_features, get_windows, WIN_LEN
+import numpy as np
 
 
 def load_model(file_name):

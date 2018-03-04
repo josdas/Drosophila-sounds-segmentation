@@ -5,7 +5,7 @@
 """
 
 
-def find_all_songs(pulses, rate=44100, min_distance=80):
+def find_all_songs(pulses, rate=44100, min_distance=0.080):
     # pulses - list(tuple)
     num_pulses = len(pulses)
     if num_pulses == 0:
@@ -19,7 +19,7 @@ def find_all_songs(pulses, rate=44100, min_distance=80):
         if pulses[i][0] - inter_puls[1] <= min_distance * rate:
             inter_res_songs.append(pulses[i])
         # если длина между > 80, делаем запись в Songs
-        elif pulses[i] - inter_puls > min_distance * rate:
+        elif pulses[i][0] - inter_puls[1] > min_distance * rate:
             song.append(list(inter_res_songs))
             arrInterLen = len(inter_res_songs)
             # очищаем массив от элементов
