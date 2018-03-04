@@ -2,26 +2,33 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.io import wavfile
 import numpy as np
 from pylab import rcParams
 import wave
-from iplot import iplot_data
+from iplot import iplot_data, iplot
+import dash_table_experiments as dt
 
 import plotly.plotly as py
 import plotly.graph_objs as gobj
 import plotly
 
-def parse_segments(file_name):
-    with open(file_name, 'r') as fl:
-        return [(int(data[1]), int(data[2]), data[0]) 
-                for data in map(lambda s: s.strip().split(), fl)]
+import pandas as pd
 
 
-def start_server(song)
+def start_server(song):
     app = dash.Dash()
+
+    DF_SEGMENTS = pd.DataFrame([(segment[0], segment[1], 'P') for segment in song['segments_pulse']] + [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
+
+    Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
+    im.write_png('spectre.png')
+    image_filename = 'spectre.png'
+
+    encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
     app.css.append_css({
         'external_url': (
@@ -54,20 +61,46 @@ def start_server(song)
                     }}),
 
         dcc.Graph(
-            id='HELLO THERE',
+            id='soundwawe',
             figure={
                 'data': iplot_data(song['samples'], segments = song['segments_pulse'], segments_1 = song['segments_sin'], skip = 20)
                 ,
                 'layout': gobj.Layout(
-                    xaxis={'title': 'GDP Per Capita'},
-                    yaxis={'title': 'Life Expectancy'},
+                    xaxis={'title': 'Time'},
+                    yaxis={'title': 'Signal level'},
                     margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
                     legend={'x': 0, 'y': 1},
                     hovermode='closest'
                 )
             }
-        )
+        ),
+
+        dcc.Markdown('''
+        ##### Table example
+        ***
+        '''.replace('  ', ''), className='container',
+        containerProps={'style': {
+                    'left': '10px',
+                    'display': 'inline',
+                }}),
+
+
+        #generate_table(df)
+        dt.DataTable(
+            rows=DF_SEGMENTS.to_dict('records'),
+
+            # optional - sets the order of columns
+            #columns=sorted(DF_SEGMENTS.columns),
+
+            row_selectable=True,
+            filterable=True,
+            sortable=True,
+            selected_row_indices=[],
+            id='datatable-segments',
+            editable=False
+        ),
+        html.Img(src='data:image/png;base64,{}'.format(encoded_image))
     ])
 
 
-    app.run_server(debug=True)
+    app.run_server(debug=False)
