@@ -24,7 +24,7 @@ def start_server(song):
 
     DF_SEGMENTS = pd.DataFrame([(segment[0], segment[1], 'P') for segment in song['segments_pulse']] + [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
-    Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['sample_rate'])
+    Pxx, freqs, bins, im = plt.specgram(song['samples'], NFFT=512, Fs=song['rate'])
     im.write_png('spectre.png')
     image_filename = 'spectre.png'
 
