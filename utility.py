@@ -14,8 +14,10 @@ def make_prediction(samples):
     return prediction
 
 
-def process_file(file_name):
+def process_file(file_name, length=None):
     sample_rate, samples = wavfile.read(file_name)
+    if length:
+        samples = samples[:length]
     segments_sin, segments_pulse = make_prediction(samples)
     song_p = find_all_songs(segments_pulse)
     print('All songs found')
@@ -24,7 +26,7 @@ def process_file(file_name):
     print('Info about sin songs calculated')
     info_pulse = [information_about_pulse_song(song, samples, sample_rate)
                   for song in song_p]
-    print('Info about pulse songs calculated')
+    print('Info  about pulse songs calculated')
     return {
         'samples': samples,
         'info_sin': info_sin,
@@ -68,12 +70,13 @@ def main():
     parser.add_argument("--pickle_load", action="store_true")
     parser.add_argument("--pickle_save", action="store_true")
     parser.add_argument("--base_save", action="store_true")
+    parser.add_argument("-len", default=None)
     parser.add_argument('-out', default=None)
 
     args = parser.parse_args()
 
     if args.pickle_load:
-        data = load_pickle_data(args.inp)
+        data = load_pickle_data(args.inp, args.len)
     else:
         data = process_file(args.inp)
 
