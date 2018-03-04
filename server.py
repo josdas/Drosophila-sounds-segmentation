@@ -18,6 +18,9 @@ def start_server(song):
         [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
     DF_SEGMENTS.columns = ['start', 'end', 'type']
+    print(len(song['info_sin']))
+    print(len(song['info_pulse']))
+
 
     DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'])
     DF_SEGMENTS_PULSE = pd.DataFrame(song['info_pulse'])
@@ -116,7 +119,7 @@ def start_server(song):
                          'display': 'inline',
                      }}),
             dt.DataTable(
-            rows=DF_SEGMENTS_PULSE.to_dict('records_sine'),
+            rows=DF_SEGMENTS_SIN.to_dict('records_sine'),
 
             # optional - sets the order of columns
             #columns=sorted(DF_SEGMENTS.columns),
@@ -131,4 +134,4 @@ def start_server(song):
 
     ])
 
-    app.run_server(debug=False)
+    app.run_server(debug=True)
