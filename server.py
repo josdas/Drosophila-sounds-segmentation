@@ -19,10 +19,10 @@ import plotly
 import pandas as pd
 
 
-def start_server(song)
+def start_server(song):
     app = dash.Dash()
 
-    DF_SEGMENTS = pd.DataFrame([(segment[0], segment[1], 'P') for segment in song['segments_pulse']] + [(segment[0], segment[1], 'P') for segment in song['segments_sin']])
+    DF_SEGMENTS = pd.DataFrame([(segment[0], segment[1], 'P') for segment in song['segments_pulse']] + [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
 
     app.css.append_css({
         'external_url': (
@@ -67,7 +67,7 @@ def start_server(song)
                     hovermode='closest'
                 )
             }
-        )
+        ),
 
         dcc.Markdown('''
         ##### Table example
@@ -100,4 +100,4 @@ def start_server(song)
     ])
 
 
-    app.run_server(debug=True)
+    app.run_server(debug=False)
