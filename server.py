@@ -21,8 +21,6 @@ def start_server(song):
     else:
         DF_SEGMENTS = pd.DataFrame([1, 2])
 
-    print(len(song['info_sin']))
-    print(len(song['info_pulse']))
 
     if len(song['info_sin']) > 0:
         DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'], columns=[
