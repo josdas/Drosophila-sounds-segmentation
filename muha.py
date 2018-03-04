@@ -6,32 +6,32 @@ from scipy.optimize import curve_fit
 
 def smooth(x, window_len=11, window='hanning'):
     """smooth the data using a window with requested size.
-    
+
     This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal 
+    The signal is prepared by introducing reflected copies of the signal
     (with the window size) in both ends so that transient parts are minimized
     in the begining and end part of the output signal.
-    
+
     input:
-        x: the input signal 
+        x: the input signal
         window_len: the dimension of the smoothing window; should be an odd integer
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
 
     output:
         the smoothed signal
-        
+
     example:
 
     t=linspace(-2,2,0.1)
     x=sin(t)+randn(len(t))*0.1
     y=smooth(x)
-    
-    see also: 
-    
+
+    see also:
+
     numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
     scipy.signal.lfilter
- 
+
     TODO: the window parameter could be the window itself if an array instead of a string
     NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
     """
@@ -111,14 +111,16 @@ def information_about_pulse_song(song, data, rate=44100, smooth_window=500):
     # return (number_of_pulses, song_duration, distances, energies, max_amps)
     return {'number_of_pulses': number_of_pulses,
             'song_duration': song_duration,
-            'distances_mean': np.mean(distances),
-            'distances_std': np.std(distances),
+            #'distances_mean': np.mean(distances),
+            #'distances_std': np.std(distances),
             'energies_mean': np.mean(energies),
             'energies_std': np.std(energies),
             'max_amps_mean': np.mean(max_amps),
             'max_amps_std': np.std(max_amps),
             'widths_mean': np.mean(widths),
-            'widths_std': np.std(widths)}
+            'widths_std': np.std(widths),
+            'start': song[0][0],
+            'end': song[-1][1]}
 
 
 def information_about_sine_song(song, data, rate=44100):
@@ -161,7 +163,7 @@ def information_about_sine_song(song, data, rate=44100):
     am_time = np.linspace(0, period * n_periods, n_periods)
     am_amplitude = np.zeros(n_periods)
     for i in range(n_periods):
-        am_amplitude[i] = np.sum(np.absolute(data[l + int(i * period * rate):l + int((i + 1) * period * rate)]))
+        am_amplitude[i] = np.sum(np.abs(data[l + int(i * period * rate):l + int((i + 1) * period * rate) + 1]))
     # print am_time
     # print am_amplitude
     # np.savetxt('sp.txt',np.column_stack((freqs,mag)))
@@ -169,4 +171,6 @@ def information_about_sine_song(song, data, rate=44100):
             'sine_freq': sine_freq,
             'n_periods': n_periods,
             'am_time_mean': np.mean(am_time),
-            'am_amplitude_mean': np.mean(am_amplitude)}
+            'am_amplitude_mean': np.mean(am_amplitude),
+            'start': l,
+            'end': r}
