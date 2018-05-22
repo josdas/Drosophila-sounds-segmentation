@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
-from features import gen_all_features, get_windows, WIN_LEN
-import numpy as np
+
+from sound_processing.model.features import gen_all_features, get_windows, WIN_LEN
 
 
 def load_model(file_name):
@@ -16,8 +16,7 @@ def predict(model, data):
 
     ls = -np.inf
 
-    probs = model.predict_proba([gen_all_features(win)
-                                 for win in windows])
+    probs = model.predict_proba([gen_all_features(win) for win in windows])
 
     i = 0
     left = None

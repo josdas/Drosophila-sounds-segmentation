@@ -1,25 +1,20 @@
 import argparse
+
 from scipy.io import wavfile
-from model import load_model, predict
-from muha import information_about_pulse_song, information_about_sine_song
-from find_all_songs import find_all_songs
-import pickle
-from server import start_server
+from sound_processing.model.model import load_model, predict
+from sound_processing.file_handler import load_pickle_file, save
+from sound_processing.processing.muha import information_about_pulse_song, information_about_sine_song
+from sound_processing.processing.find_all_songs import find_all_songs
+from frontend.server import start_server
 
 
-def make_prediction(samples):
-    model = load_model('model.pickle')
-    prediction = predict(model, samples)
-    return prediction
-
-
-def process_file(file_name, length=None):
+def process_file(model, file_name, length=None):
     sample_rate, samples = wavfile.read(file_name)
     print('Wav loaded')
     if length:
         samples = samples[:length]
         print('Cut')
-    segments_sin, segments_pulse = make_prediction(samples)
+    segments_sin, segments_pulse = predict(model, samples)
     print('Segments predicted')
     song_p = find_all_songs(segments_pulse)
     print('All songs found')
@@ -28,7 +23,7 @@ def process_file(file_name, length=None):
     print('Info about sin songs calculated')
     info_pulse = [information_about_pulse_song(song, samples, sample_rate)
                   for song in song_p]
-    print('Info  about pulse songs calculated')
+    print('Info about pulse songs calculated')
     return {
         'samples': samples,
         'info_sin': info_sin,
@@ -38,30 +33,6 @@ def process_file(file_name, length=None):
         'segments_pulse': segments_pulse,
         'file_name': file_name
     }
-
-
-def create_pickle_file(data, file_name, out_file=None):
-    if not out_file:
-        out_file = file_name + '.pickle'
-    with open(out_file, 'wb') as fl:
-        pickle.dump(data, fl)
-    return out_file
-
-
-def create_base_file(data, file_name, out_file=None):
-    if not out_file:
-        out_file = file_name + '.6'
-    with open(out_file, 'w') as fl:
-        all_segments = [('S', segment[0], segment[1]) for segment in data['segments_sin']] + \
-                       [('P', segment[0], segment[1]) for segment in data['segments_pulse']]
-        for segment in all_segments:
-            fl.write('{} {} {}\n'.format(*segment))
-    return out_file
-
-
-def load_pickle_data(file_name):
-    with open(file_name, 'rb') as fl:
-        return pickle.load(fl)
 
 
 def main():
@@ -77,18 +48,19 @@ def main():
 
     args = parser.parse_args()
     if args.pickle_load:
-        data = load_pickle_data(args.inp)
+        data = load_pickle_file(args.inp)
     else:
-        data = process_file(args.inp, args.len)
+        model = load_model('model.pickle')
+        data = process_file(model, args.inp, args.len)
 
     print('Loaded {} chunks'.format(len(data['samples'])))
 
     if args.pickle_save:
-        out = create_pickle_file(data, args.inp, args.out)
+        out = save(data, args.inp, out_file=args.out, format='bin')
         print('Saved pickle file in', out)
 
     if args.base_save:
-        out = create_base_file(data, args.inp, args.out)
+        out = save(data, args.inp, out_file=args.out, format='lab')
         print('Saved base file in', out)
 
     if not args.server_off:

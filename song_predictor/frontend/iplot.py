@@ -1,20 +1,19 @@
-import plotly.plotly as py
-import plotly.graph_objs as gobj
+from plotly import graph_objs
 import plotly
 
 plotly.offline.init_notebook_mode()
 
 BASE_LINE = dict(
-    color=('rgb(22, 96, 167)'),
+    color='rgb(22, 96, 167)',
     width=1,
 )
 
 SEGMENT_LINE = dict(
-    color=('rgb(200, 20, 02)'),
+    color='rgb(200, 20, 02)',
     width=3,
 )
 SEGMENT_LINE_1 = dict(
-    color=('rgb(200, 200, 02)'),
+    color='rgb(200, 200, 02)',
     width=3,
 )
 
@@ -57,7 +56,7 @@ def iplot_data(y, x=None, segments=None, segments_1=None, skip=1):
             if colors[i - 1] or colors_1[i - 1]:
                 color = SEGMENT_LINE_1 if colors_1[i - 1] else SEGMENT_LINE
                 text = 'sin' if colors_1[i - 1] else 'pulse'
-            trace = gobj.Scatter(
+            trace = graph_objs.Scatter(
                 y=y[left:i],
                 x=x[left:i],
                 line=color,
@@ -66,7 +65,7 @@ def iplot_data(y, x=None, segments=None, segments_1=None, skip=1):
             traces.append(trace)
             left = i - 1
 
-    data = gobj.Data(traces)
+    data = graph_objs.Data(traces)
     return data
 
 

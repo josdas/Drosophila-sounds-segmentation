@@ -4,7 +4,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import matplotlib.pyplot as plt
-from iplot import iplot_data
+from frontend.iplot import iplot_data
 import dash_table_experiments as dt
 import plotly.graph_objs as gobj
 import pandas as pd
@@ -20,7 +20,6 @@ def start_server(song):
                                         [(segment[0], segment[1], 'S') for segment in song['segments_sin']])
     else:
         DF_SEGMENTS = pd.DataFrame([1, 2])
-
 
     if len(song['info_sin']) > 0:
         DF_SEGMENTS_SIN = pd.DataFrame(song['info_sin'], columns=[
@@ -47,7 +46,7 @@ def start_server(song):
     image_filename = 'fft.png'
     fig, ax = plt.subplots(figsize=(8, 6))
     fourier = np.fft.fftshift(np.fft.fft(song['samples'], n=len(song['samples'])))
-    fourier = fourier[int(len(fourier)*0.45):int(len(fourier)*0.55)]
+    fourier = fourier[int(len(fourier) * 0.45):int(len(fourier) * 0.55)]
     ax.plot([x.real for x in fourier])
     fig.savefig(image_filename, dpi=100, bbox_inches='tight')
     with open(image_filename, 'rb') as fl:

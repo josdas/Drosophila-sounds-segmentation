@@ -6,7 +6,6 @@
 
 
 def find_all_songs(pulses, rate=44100, min_distance=0.080):
-    # pulses - list(tuple)
     num_pulses = len(pulses)
     if num_pulses == 0:
         return []

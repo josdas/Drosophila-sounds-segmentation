@@ -3,16 +3,10 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import matplotlib.pyplot as plt
-from scipy import signal
 from scipy.io import wavfile
-import numpy as np
-from pylab import rcParams
-import wave
-from iplot import iplot_data, iplot
+from frontend.iplot import iplot_data
 import dash_table_experiments as dt
 
-import plotly.plotly as py
 import plotly.graph_objs as gobj
 import plotly
 
