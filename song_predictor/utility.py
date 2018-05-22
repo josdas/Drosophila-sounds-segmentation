@@ -44,13 +44,28 @@ def process_file(model, file_name, length=None):
 def main():
     parser = argparse.ArgumentParser(description='File name')
 
-    parser.add_argument('-input')
-    parser.add_argument("--server_off", action="store_true")
-    parser.add_argument("--bin_load", action="store_true")
-    parser.add_argument("--bin_save", action="store_true")
-    parser.add_argument("--lab_save", action="store_true")
-    parser.add_argument("-len", default=None, type=int)
-    parser.add_argument('-output', default=None)
+    parser.add_argument('-input',
+                        help='Path to *.wav file with recorder of songs')
+
+    parser.add_argument("--server_off", action="store_true",
+                        help='Flag to cancel server running\n'
+                             'Set up if you do not want to run server')
+
+    parser.add_argument("--bin_load", action="store_true",
+                        help='Set up if you want to load result from binary file')
+
+    parser.add_argument("--bin_save", action="store_true",
+                        help='Set up if you want to save result as binary file')
+
+    parser.add_argument("--lab_save", action="store_true",
+                        help='Set up if you want to save result in laboratory format')
+
+    parser.add_argument("-len", default=None, type=int,
+                        help='Run program for prefix of file with length of "len"\n'
+                             'This is special option for testing')
+
+    parser.add_argument('-output', default=None,
+                        help='Path to output')
 
     args = parser.parse_args()
     if args.bin_load:
@@ -63,13 +78,13 @@ def main():
 
     if args.bin_save:
         output_name = args.output | args.input + '.pickle'
-        output = save(data, output_name, format='bin')
-        print('Saved pickled file in', output)
+        save(data, output_name, format='bin')
+        print('Saved pickled file in', output_name)
 
     if args.lab_save:
         output_name = args.output | args.input + '.6'
-        output = save(data, output_name, format='lab')
-        print('Saved lab file in', output)
+        save(data, output_name, format='lab')
+        print('Saved lab file in', output_name)
 
     if not args.server_off:
         print('Starting server')
