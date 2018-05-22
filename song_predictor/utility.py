@@ -38,30 +38,32 @@ def process_file(model, file_name, length=None):
 def main():
     parser = argparse.ArgumentParser(description='File name')
 
-    parser.add_argument('-inp')
+    parser.add_argument('-input')
     parser.add_argument("--server_off", action="store_true")
-    parser.add_argument("--pickle_load", action="store_true")
-    parser.add_argument("--pickle_save", action="store_true")
-    parser.add_argument("--base_save", action="store_true")
+    parser.add_argument("--bin_load", action="store_true")
+    parser.add_argument("--bin_save", action="store_true")
+    parser.add_argument("--lab_save", action="store_true")
     parser.add_argument("-len", default=None, type=int)
-    parser.add_argument('-out', default=None)
+    parser.add_argument('-output', default=None)
 
     args = parser.parse_args()
-    if args.pickle_load:
-        data = load_pickle_file(args.inp)
+    if args.bin_load:
+        data = load_pickle_file(args.input)
     else:
         model = load_model('model.pickle')
-        data = process_file(model, args.inp, args.len)
+        data = process_file(model, args.input, args.len)
 
     print('Loaded {} chunks'.format(len(data['samples'])))
 
-    if args.pickle_save:
-        out = save(data, args.inp, out_file=args.out, format='bin')
-        print('Saved pickle file in', out)
+    if args.bin_save:
+        output_name = args.output | args.input + '.pickle'
+        output = save(data, output_name, format='bin')
+        print('Saved pickle file in', output)
 
-    if args.base_save:
-        out = save(data, args.inp, out_file=args.out, format='lab')
-        print('Saved base file in', out)
+    if args.lab_save:
+        output_name = args.output | args.input + '.6'
+        output = save(data, output_name, format='lab')
+        print('Saved base file in', output)
 
     if not args.server_off:
         print('Starting server')
