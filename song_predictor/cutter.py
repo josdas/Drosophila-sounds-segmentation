@@ -1,9 +1,9 @@
 import pickle
 import numpy as np
-import wavio
+from scipy.io import wavfile
 from glob import glob
 
-path = "/Users/seva/biohack/data/soundAnalysis/data/22-03-16-CS-agn-n-AD7/*/*.wav"
+path = "../soundAnalysis/data/data/*/*.wav"
 
 files = glob(path)
 
@@ -11,16 +11,15 @@ cutted_wav = []
 song_type = []
 file_names = []
 
-print "Files = ", len(files)
+print ("Files = ", len(files))
 i = 0
 
 for file in files:
     i += 1
-    print i
+    print (i)
 
     fname = file[:-4]
-    with open(fname + ".wav") as f:
-        rate, sampwidth, wav = wavio.readwav(f)
+    rate, wav =  wavfile.read(fname + ".wav")
 
     # get annotation
     with open(fname + ".6") as f:
