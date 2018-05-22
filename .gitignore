@@ -1,0 +1,4 @@
+.idea
+song_predictor/.idea
+song_predictor/__pycache__
+*.pyc

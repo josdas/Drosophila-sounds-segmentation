@@ -1,0 +1,99 @@
+import os
+import argparse
+from scipy.io import wavfile
+from tqdm import tqdm
+
+from sound_processing.model.model import load_model, predict
+from sound_processing.file_handler import load_pickle_file, save
+from sound_processing.processing.muha import information_about_pulse_song, information_about_sine_song
+from sound_processing.processing.find_all_songs import find_all_songs
+from frontend.server import start_server
+
+
+def process_file(model, file_name, length=None):
+    sample_rate, samples = wavfile.read(file_name)
+    print('Wav loaded\n')
+
+    if length:
+        samples = samples[:length]
+        print('Cut')
+
+    segments_sin, segments_pulse = predict(model, samples)
+    print('Segments predicted\n')
+
+    song_p = find_all_songs(segments_pulse)
+    print('All songs found\n')
+
+    info_sin = [information_about_sine_song(segment_sin, samples, sample_rate)
+                for segment_sin in tqdm(segments_sin, desc='Sine songs')]
+    print('Info about sin songs calculated\n')
+
+    info_pulse = [information_about_pulse_song(song, samples, sample_rate)
+                  for song in tqdm(song_p, desc='Pulse songs')]
+    print('Info about pulse songs calculated\n')
+
+    return {
+        'samples': samples,
+        'info_sin': info_sin,
+        'info_pulse': info_pulse,
+        'rate': sample_rate,
+        'segments_sin': segments_sin,
+        'segments_pulse': segments_pulse,
+        'file_name': file_name
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Song predictor')
+
+    parser.add_argument('input',
+                        help='Path to *.wav file with songs recording')
+
+    parser.add_argument('--output', default=None,
+                        help='Path to output\n'
+                             'Default: generate file with the same path as input and add special suffix')
+
+    parser.add_argument("--server_off", action="store_true",
+                        help='Flag to cancel server running \n'
+                             'Set up if you do not want to run server')
+
+    parser.add_argument("--bin_load", action="store_true",
+                        help='Load result from binary file')
+
+    parser.add_argument("--bin_save", action="store_true",
+                        help='Save result as binary file')
+
+    parser.add_argument("--lab_save", action="store_true",
+                        help='Save result in laboratory format')
+
+    parser.add_argument("--len", default=None, type=int,
+                        help='Run program for prefix of file with length of "len"\n'
+                             'This is special option for testing')
+
+    args = parser.parse_args()
+
+    if args.bin_load:
+        data = load_pickle_file(args.input)
+    else:
+        model = load_model(os.path.join('data', 'model.pickle'))
+        data = process_file(model, args.input, args.len)
+
+    print('Loaded {} chunks'.format(len(data['samples'])))
+
+    if args.bin_save:
+        output_name = args.output | args.input + '.pickle'
+        save(data, output_name, format='bin')
+        print('Saved pickled file in', output_name)
+
+    if args.lab_save:
+        output_name = args.output | args.input + '.6'
+        save(data, output_name, format='lab')
+        print('Saved lab file in', output_name)
+
+    if not args.server_off:
+        print('Starting server')
+        start_server(data)
+
+
+if __name__ == '__main__':
+    main()
