@@ -5,7 +5,6 @@ def save(data, output_file=None, format='bin'):
     if format == 'bin':
         with open(output_file, 'wb') as fl:
             pickle.dump(data, fl)
-        return output_file
     elif format == 'lab':
         segments = [('S', segment[0], segment[1])
                     for segment in data['segments_sin']]
@@ -14,7 +13,6 @@ def save(data, output_file=None, format='bin'):
         with open(output_file, 'w') as fl:
             for segment in segments:
                 fl.write('{} {} {}\n'.format(*segment))
-        return output_file
     else:
         raise ValueError("Unknown format")
 

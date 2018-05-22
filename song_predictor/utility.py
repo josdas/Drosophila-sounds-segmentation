@@ -42,32 +42,34 @@ def process_file(model, file_name, length=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='File name')
+    parser = argparse.ArgumentParser(description='Song predictor')
 
-    parser.add_argument('-input',
-                        help='Path to *.wav file with recorder of songs')
+    parser.add_argument('input',
+                        help='Path to *.wav file with songs recording')
+
+    parser.add_argument('--output', default=None,
+                        help='Path to output\n'
+                             'Default: generate file with the same path as input and add special suffix')
 
     parser.add_argument("--server_off", action="store_true",
                         help='Flag to cancel server running\n'
                              'Set up if you do not want to run server')
 
     parser.add_argument("--bin_load", action="store_true",
-                        help='Set up if you want to load result from binary file')
+                        help='Load result from binary file')
 
     parser.add_argument("--bin_save", action="store_true",
-                        help='Set up if you want to save result as binary file')
+                        help='Save result as binary file')
 
     parser.add_argument("--lab_save", action="store_true",
-                        help='Set up if you want to save result in laboratory format')
+                        help='Save result in laboratory format')
 
-    parser.add_argument("-len", default=None, type=int,
+    parser.add_argument("--len", default=None, type=int,
                         help='Run program for prefix of file with length of "len"\n'
                              'This is special option for testing')
 
-    parser.add_argument('-output', default=None,
-                        help='Path to output')
-
     args = parser.parse_args()
+
     if args.bin_load:
         data = load_pickle_file(args.input)
     else:
