@@ -5,10 +5,10 @@ PERCENTILE_COUNT = 7
 
 
 def get_windows(arr):
-    l = 0
-    while l < len(arr):
-        yield arr[l:l + WIN_LEN]
-        l += WIN_LEN
+    start = 0
+    while start < len(arr):
+        yield arr[start:start + WIN_LEN]
+        start += WIN_LEN
 
 
 def gen_features_way_1(x: np.array):

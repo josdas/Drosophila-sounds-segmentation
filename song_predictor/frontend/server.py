@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 
 
-def start_server(song):
+def start_server(song, debug=False):
     app = dash.Dash()
 
     if len(song['segments_pulse']) + len(song['segments_sin']) > 0:
@@ -148,4 +148,4 @@ def start_server(song):
 
     ])
 
-    app.run_server(debug=True)
+    app.run_server(debug=debug)  # for internet server host='0.0.0.0'

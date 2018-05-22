@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+from tqdm import tqdm
 
 from sound_processing.model.features import gen_all_features, get_windows, WIN_LEN
 
@@ -10,19 +11,20 @@ def load_model(file_name):
 
 
 def predict(model, data):
-    windows = get_windows(data)
+    features = [gen_all_features(win)
+                for win in tqdm(get_windows(data),
+                                desc='Feature generation',
+                                total=(len(data) + WIN_LEN - 1) // WIN_LEN)]
+
+    probs = model.predict_proba(features)
 
     segments_s, segments_p = [], []
-
-    ls = -np.inf
-
-    probs = model.predict_proba([gen_all_features(win) for win in windows])
-
     i = 0
+    ls = -np.inf
     left = None
     last_prediction = None
 
-    for prob in probs:
+    for prob in tqdm(probs, desc='Model postprocessing'):
         prob = dict(zip(model.classes_, prob))
 
         if prob['N'] > 0.15:
