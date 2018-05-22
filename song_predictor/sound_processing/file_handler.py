@@ -7,10 +7,12 @@ def save(data, output_file=None, format='bin'):
             pickle.dump(data, fl)
         return output_file
     elif format == 'lab':
-        all_segments = [('S', segment[0], segment[1]) for segment in data['segments_sin']]
-        all_segments += [('P', segment[0], segment[1]) for segment in data['segments_pulse']]
+        segments = [('S', segment[0], segment[1])
+                    for segment in data['segments_sin']]
+        segments += [('P', segment[0], segment[1])
+                     for segment in data['segments_pulse']]
         with open(output_file, 'w') as fl:
-            for segment in all_segments:
+            for segment in segments:
                 fl.write('{} {} {}\n'.format(*segment))
         return output_file
     else:

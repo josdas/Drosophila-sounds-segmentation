@@ -11,19 +11,25 @@ from frontend.server import start_server
 def process_file(model, file_name, length=None):
     sample_rate, samples = wavfile.read(file_name)
     print('Wav loaded')
+
     if length:
         samples = samples[:length]
         print('Cut')
+
     segments_sin, segments_pulse = predict(model, samples)
     print('Segments predicted')
+
     song_p = find_all_songs(segments_pulse)
     print('All songs found')
+
     info_sin = [information_about_sine_song(segment_sin, samples, sample_rate)
                 for segment_sin in segments_sin]
     print('Info about sin songs calculated')
+
     info_pulse = [information_about_pulse_song(song, samples, sample_rate)
                   for song in song_p]
     print('Info about pulse songs calculated')
+
     return {
         'samples': samples,
         'info_sin': info_sin,
@@ -58,12 +64,12 @@ def main():
     if args.bin_save:
         output_name = args.output | args.input + '.pickle'
         output = save(data, output_name, format='bin')
-        print('Saved pickle file in', output)
+        print('Saved pickled file in', output)
 
     if args.lab_save:
         output_name = args.output | args.input + '.6'
         output = save(data, output_name, format='lab')
-        print('Saved base file in', output)
+        print('Saved lab file in', output)
 
     if not args.server_off:
         print('Starting server')
